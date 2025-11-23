@@ -1,0 +1,99 @@
+http://localhost:8000/api/v1/auth/signup
+{
+  "name": "Admin",
+  "email": "admin0@admin.com",
+    "password": "123456",
+  "passwordConfirm": "123456",
+  "role": "admin"
+}
+
+
+post http://localhost:8000/api/v1/auth/login
+{
+  "name": "Admin",
+  "email": "admin0@admin.com",
+    "password": "123456"
+}
+
+POST /api/v1/cart
+{
+  "productId": "ID",
+  "quantity": 1
+}
+
+POST /api/v1/orders/:cartId
+{
+  "shippingAddress": {
+    "details": "Khartoum",
+    "phone": "09999999",
+    "city": "Khartoum"
+  }
+}
+
+GET /api/v1/orders
+
+put http://localhost:8000/api/v1/orders/6920f21a999e6af553a8f125/pay
+
+
+http://localhost:8000/api/v1/products
+Content-Type: multipart/form-data
+Authorization: Bearer <token>
+| Key         | Type | Example Value            |
+| ----------- | ---- | ------------------------ |
+| title       | Text | "منتج تجريبي"            |
+| description | Text | "وصف المنتج التجريبي"    |
+| quantity    | Text | 10                       |
+| price       | Text | 150                      |
+| category    | Text | 691f6bd063a0a3709983d118 |
+| imageCover  | File | اختر صورة                |
+| vedios      | File | اختر فيديو             |
+
+POST /api/v1/products
+- title
+- slug
+- description
+- quantity
+- price
+- category
+- imageCover (ملف)
+- video (ملف واحد)
+
+PUT http://localhost:8000/api/v1/products/id
+Authorization: Bearer <token>
+| Key         | Type | Example Value            |
+| ----------- | ---- | ------------------------ |
+| title       | Text | "منتج تجريبي"            |
+| description | Text | "وصف المنتج التجريبي"    |
+| quantity    | Text | 10                       |
+| price       | Text | 150                      |
+| category    | Text | 691f6bd063a0a3709983d118 |
+| imageCover  | File | اختر صورة                |
+| images      | File | اختر 1-5 صور             |
+
+POST http://localhost:8000/api/v1/cart
+Authorization: Bearer <user token>
+
+{
+  "productId": "691f6c4e63bb48c3dd91fc74",
+  "quantity": 1,
+  "color": null
+}
+
+
+POST http://localhost:8000/api/v1/orders/694cd8e463a0a3709983d500
+Authorization: Bearer <user_token>
+
+(Stripe)
+GET http://localhost:8000/api/v1/orders/checkout-session/694cd8e463a0a3709983d500
+Authorization: Bearer <user_token>
+
+GET http://localhost:8000/api/v1/orders/
+Authorization: Bearer <token>
+
+GET http://localhost:8000/api/v1/orders/69ac50d063da90ce44fccb09
+Authorization: Bearer <token>
+
+
+PUT http://localhost:8000/api/v1/orders/69ac50d063da90ce44fccb09/pay
+Authorization: Bearer <admin_token>
+
