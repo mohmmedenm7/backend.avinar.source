@@ -1,3 +1,4 @@
+// routes/index.js
 const categoryRoute = require('./categoryRoute');
 const subCategoryRoute = require('./subCategoryRoute');
 const brandRoute = require('./brandRoute');
@@ -10,6 +11,7 @@ const addressRoute = require('./addressRoute');
 const couponRoute = require('./couponRoute');
 const cartRoute = require('./cartRoute');
 const orderRoute = require('./orderRoute');
+const visitorRoutes = require('./visitorRoutes'); // ← إضافة هنا
 
 const mountRoutes = (app) => {
   app.use('/api/v1/categories', categoryRoute);
@@ -24,6 +26,9 @@ const mountRoutes = (app) => {
   app.use('/api/v1/coupons', couponRoute);
   app.use('/api/v1/cart', cartRoute);
   app.use('/api/v1/orders', orderRoute);
+
+  // راوت الزوار
+  app.use('/api/visitors', visitorRoutes);
 };
 
-module.exports = mountRoutes;
+module.exports = mountRoutes; // ← تصدير واحد فقط

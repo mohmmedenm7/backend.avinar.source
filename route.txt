@@ -16,10 +16,10 @@ post http://localhost:8000/api/v1/auth/login
 }
 
 POST /api/v1/cart
-{
-  "productId": "ID",
-  "quantity": 1
-}
+  {
+    "productId": "ID",
+    "quantity": 1
+  }
 
 POST /api/v1/orders/:cartId
 {
@@ -33,6 +33,10 @@ POST /api/v1/orders/:cartId
 GET /api/v1/orders
 
 put http://localhost:8000/api/v1/orders/6920f21a999e6af553a8f125/pay
+
+http://localhost:8000/api/v1/orders/6920f21a999e6af553a8f125/payment-status
+Authorization: Bearer <token>
+
 
 
 http://localhost:8000/api/v1/products

@@ -24,9 +24,13 @@ dbConnection();
 // express app
 const app = express();
 
-// Enable other domains to access your application
-app.use(cors());
-app.options('*', cors());
+// Enable other domains to access your application with specific origin and credentials
+const corsOptions = {
+  origin: 'https://avinar-source.vercel.app',
+  credentials: true,
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // compress all responses
 app.use(compression());

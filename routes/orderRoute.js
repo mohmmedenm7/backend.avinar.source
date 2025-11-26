@@ -6,7 +6,9 @@ const {
   getUserOrders,
   updateOrderStatus,
   deleteOrder,
+  payOrder   // ← أضف هذا
 } = require('../services/orderService');
+
 
 const authService = require('../services/authService');
 
@@ -50,5 +52,10 @@ router.delete(
   authService.allowedTo('admin'),
   deleteOrder
 );
+
+// Pay order (set order as paid)
+router.put('/:id/pay', authService.allowedTo('user', 'admin'), payOrder);
+
+
 
 module.exports = router;

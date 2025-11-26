@@ -18,37 +18,59 @@ const calcTotalCartPrice = (cart) => {
 // @desc    Add product to  cart
 // @route   POST /api/v1/cart
 // @access  Private/User
+// @desc    Add product to cart
+// @route   POST /api/v1/cart
+// @access  Private/User
 exports.addProductToCart = asyncHandler(async (req, res, next) => {
   const { productId, color } = req.body;
+
+  // Validate that productId exists
+  if (!productId) {
+    return next(new ApiError("Product ID is required", 400));
+  }
+
+  // Find product by ID
   const product = await Product.findById(productId);
+
+  // Check if product exists
+  if (!product) {
+    return next(new ApiError("Product not found", 404));
+  }
 
   // 1) Get Cart for logged user
   let cart = await Cart.findOne({ user: req.user._id });
 
   if (!cart) {
-    // create cart fot logged user with product
+    // Create new cart if it doesn't exist
     cart = await Cart.create({
       user: req.user._id,
-      cartItems: [{ product: productId, color, price: product.price }],
+      cartItems: [{
+        product: productId,
+        color,
+        price: product.price,
+        quantity: 1
+      }],
     });
   } else {
-    // product exist in cart, update product quantity
+    // Check if item with same product and color already exists
     const productIndex = cart.cartItems.findIndex(
       (item) => item.product.toString() === productId && item.color === color
     );
 
     if (productIndex > -1) {
-      const cartItem = cart.cartItems[productIndex];
-      cartItem.quantity += 1;
-
-      cart.cartItems[productIndex] = cartItem;
+      // Item exists, increment quantity
+      cart.cartItems[productIndex].quantity += 1;
     } else {
-      // product not exist in cart,  push product to cartItems array
-      cart.cartItems.push({ product: productId, color, price: product.price });
+      // New item, add to cart
+      cart.cartItems.push({
+        product: productId,
+        color,
+        price: product.price,
+        quantity: 1
+      });
     }
   }
 
-  // Calculate total cart price
   calcTotalCartPrice(cart);
   await cart.save();
 
@@ -176,5 +198,99 @@ exports.applyCoupon = asyncHandler(async (req, res, next) => {
     status: 'success',
     numOfCartItems: cart.cartItems.length,
     data: cart,
+  });
+});
+
+// @desc    Get cart payment status by email
+// @route   GET /api/v1/cart/status/:email
+// @access  Public
+exports.getCartPaymentStatusByEmail = asyncHandler(async (req, res, next) => {
+  const { email } = req.params;
+
+  console.log('🔍 [Cart Status Route Hit] - Route: /api/v1/cart/status/:email');
+  console.log('📧 Email parameter received:', email);
+  console.log('🌐 Full URL:', req.originalUrl);
+  console.log('📋 All params:', req.params);
+
+  // Find user by email
+  const User = require('../models/userModel');
+  const user = await User.findOne({ email: email.toLowerCase() });
+
+  if (!user) {
+    console.log('❌ User not found with email:', email);
+    return next(new ApiError(`No user found with email: ${email}. Please check if the email is correct.`, 404));
+  }
+
+  console.log('✅ User found:', user.email);
+
+  // Check if user has any paid orders
+  const Order = require('../models/orderModel');
+  const paidOrder = await Order.findOne({ user: user._id, isPaid: true });
+
+  const paymentStatus = paidOrder ? 'مدفوع' : 'غير مدفوع';
+  console.log('💳 Payment status:', paymentStatus);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      email: user.email,
+      paymentStatus: paymentStatus,
+      isPaid: !!paidOrder,
+    },
+  });
+});
+
+// @desc    Get payment status for specific product by email
+// @route   GET /api/v1/cart/status/:email/product/:productId
+// @access  Public
+exports.getProductPaymentStatusByEmail = asyncHandler(async (req, res, next) => {
+  const { email, productId } = req.params;
+
+  console.log('🔍 [Product Status Route Hit] - Route: /api/v1/cart/status/:email/product/:productId');
+  console.log('📧 Email parameter received:', email);
+  console.log('📦 Product ID parameter received:', productId);
+  console.log('🌐 Full URL:', req.originalUrl);
+  console.log('📋 All params:', req.params);
+
+  // Find user by email
+  const User = require('../models/userModel');
+  const user = await User.findOne({ email: email.toLowerCase() });
+
+  if (!user) {
+    console.log('❌ User not found with email:', email);
+    return next(new ApiError(`No user found with email: ${email}. Please check if the email is correct.`, 404));
+  }
+
+  console.log('✅ User found:', user.email);
+
+  // Check if product exists
+  const product = await Product.findById(productId);
+  if (!product) {
+    console.log('❌ Product not found with ID:', productId);
+    return next(new ApiError(`Product not found with ID: ${productId}. Please check if the product ID is correct.`, 404));
+  }
+
+  console.log('✅ Product found:', product.title);
+
+  // Check if user has any paid orders containing this product
+  const Order = require('../models/orderModel');
+  const paidOrderWithProduct = await Order.findOne({
+    user: user._id,
+    isPaid: true,
+    'cartItems.product': productId,
+  });
+
+  const paymentStatus = paidOrderWithProduct ? 'مدفوع' : 'غير مدفوع';
+  console.log('💳 Payment status for product:', paymentStatus);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      email: user.email,
+      productId: productId,
+      productTitle: product.title,
+      paymentStatus: paymentStatus,
+      isPaid: !!paidOrderWithProduct,
+    },
   });
 });
